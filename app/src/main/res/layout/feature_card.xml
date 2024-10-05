@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:id="@+id/feature_card"
+    android:layout_margin="15dp"
+    android:background="@drawable/img2"
+    android:elevation="4dp"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/cardtittle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Emergency"
+        android:textSize="28dp"
+        android:textStyle="bold">
+    </TextView>
+
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="wsrdtfyguhuyyutydrdrestrdytyufy"
+        android:textSize="22dp"></TextView>
+
+
+
+
+</LinearLayout>

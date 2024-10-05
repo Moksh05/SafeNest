@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/home"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/nav_education"
+        android:icon="@drawable/info"
+        android:title="Education" />
+
+    <item
+        android:id="@+id/nav_sos"
+        android:icon="@drawable/sos"
+        android:title="SOS" />
+
+    <item
+        android:id="@+id/nav_helpline"
+        android:icon="@drawable/helpline"
+        android:title="Helpline" />
+
+    <item
+        android:id="@+id/nav_location"
+        android:icon="@drawable/location"
+        android:title="Location" />
+
+</menu>
