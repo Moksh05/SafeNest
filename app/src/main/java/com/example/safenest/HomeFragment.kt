@@ -17,6 +17,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.registerReceiver
 import androidx.viewpager2.widget.ViewPager2
@@ -25,6 +26,8 @@ import com.example.safenest.adapters.Card
 import com.example.safenest.adapters.SliderviewAdapter
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+
+
 
 class HomeFragment : Fragment() {
     private val PERMISSION_REQUEST_CODE = 100
@@ -39,6 +42,7 @@ class HomeFragment : Fragment() {
     private lateinit var safePlacesButton: CardView
 
     private lateinit var fakecall : CardView
+    private lateinit var geofencing : CardView
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -56,8 +60,9 @@ class HomeFragment : Fragment() {
         Log.d("line44","crashing here")
         viewPager = view.findViewById(R.id.viewPager)
         sosbutton = view.findViewById(R.id.sos_button)
-        fakecall = view.findViewById((R.id.fakecall_button))
         safePlacesButton = view.findViewById(R.id.safeplaces_button)
+        geofencing = view.findViewById(R.id.geofencing)
+        fakecall = view.findViewById(R.id.fakecall_button)
         // Create the card list
         val cardList = listOf(
             Card(R.drawable.login_img, "Police", "1-0-0"),
@@ -90,6 +95,13 @@ class HomeFragment : Fragment() {
         safePlacesButton.setOnClickListener {
             startActivity(Intent(requireContext(), SafePlacesActivity::class.java))
         }
+
+        geofencing.setOnClickListener {
+            val geofencingintent = Intent(requireContext(),GeofencingActivity::class.java)
+            startActivity(geofencingintent)
+        }
+
+        getallcontacts()
 //        handler = Handler(Looper.getMainLooper())
 //
 //        // Initialize the Runnable to launch the FakeCallActivity
@@ -162,7 +174,6 @@ class HomeFragment : Fragment() {
                 requestPermissions()
                 return
             }
-
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location ->
                     if (location != null) {
@@ -171,15 +182,16 @@ class HomeFragment : Fragment() {
                         val message =
                             "SOS! I need help. My current location is: https://maps.google.com/?q=$latitude,$longitude"
 
-                        sendSMS("+919821063740", message)
+                        for (contact in phoneNumberList) {
+                            val phoneNumber = contact.second // Get the phone number from the pair
+                            sendSMS(phoneNumber, message)
+                        }
                     }
                 }
         } else {
             requestPermissions()
         }
     }
-
-
     fun sendSMS(phoneNumber: String, message: String) {
         try {
             val smsManager: SmsManager = SmsManager.getDefault()

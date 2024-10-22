@@ -3,40 +3,46 @@ package com.example.safenest.Receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.media.MediaPlayer
 import android.util.Log
+import com.example.safenest.R
 import com.example.safenest.Service.SirenService
 
+
 class PowerButtonReceiver : BroadcastReceiver() {
-    private var pressCount = 0
-    private var lastPressTime: Long = 0
-    private val requiredPressCount = 3
-    private val interval: Long = 2000 // Maximum time interval between presses
+    private var mediaPlayer: MediaPlayer? = null
+    private var powerBtnTapCount = 0
+    companion object {
+        const val SCREEN_TOGGLE_TAG = "SCREEN_TOGGLE_TAG"
+    }
 
-    override fun onReceive(context: Context?, intent: Intent?) {
-        if (intent?.action == Intent.ACTION_SCREEN_OFF || intent?.action == Intent.ACTION_SCREEN_ON) {
-            val currentTime = System.currentTimeMillis()
+    override fun onReceive(context: Context, intent: Intent) {
+        val action = intent.action
 
-            // Check if time between presses is within the allowed interval
-            if (currentTime - lastPressTime <= interval) {
-                pressCount++
-                Log.d("Phonenumber","$pressCount")
-            } else {
-                pressCount = 1 // Reset if time interval exceeds
-            }
-
-            lastPressTime = currentTime
-
-            if (pressCount >= requiredPressCount) {
-                // Trigger the siren
-                triggerSiren(context)
-                pressCount = 0 // Reset after triggering
+        // Handling power button tap count
+        if ((Intent.ACTION_SCREEN_OFF == action || Intent.ACTION_SCREEN_ON == action) && powerBtnTapCount == 0) {
+            powerBtnTapCount++
+        } else if (powerBtnTapCount > 0) {
+            if (Intent.ACTION_SCREEN_OFF == action || Intent.ACTION_SCREEN_ON == action) {
+                powerBtnTapCount++
+                Log.d("mystringcheck","power button taps : $powerBtnTapCount")
             }
         }
-    }
 
-    private fun triggerSiren(context: Context?) {
-        val intent = Intent(context, SirenService::class.java)
-        context?.startService(intent) // Start a service to play the siren
+        // Initialize MediaPlayer for the siren sound
+        if (mediaPlayer == null) {
+            mediaPlayer = MediaPlayer.create(context.applicationContext, R.raw.siren)
+        }
+
+        // Start playing loud siren when power button is tapped 6 times
+        if (powerBtnTapCount == 2) {
+            mediaPlayer?.start()
+            mediaPlayer?.isLooping = true
+            powerBtnTapCount = 0 // Reset the tap count
+        }
     }
 }
+
+
+
 

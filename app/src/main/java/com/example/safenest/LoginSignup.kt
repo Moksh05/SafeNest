@@ -41,11 +41,11 @@ class LoginSignup : AppCompatActivity() {
 
         firebaseAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener{task->
             if(task.isSuccessful){
-                Toast.makeText(this,"User Verified ,Loging In",Toast.LENGTH_SHORT)
+                Toast.makeText(this,"User Verified ,Loging In",Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this@LoginSignup,MainActivity::class.java))
             }
         }.addOnFailureListener {
-            Toast.makeText(this,"Failed to Login , Try Again",Toast.LENGTH_SHORT)
+            Toast.makeText(this,"Failed to Login , Try Again",Toast.LENGTH_SHORT).show()
         }
     }
 

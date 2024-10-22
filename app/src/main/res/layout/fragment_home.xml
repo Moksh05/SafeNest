@@ -24,10 +24,11 @@
        android:layout_below="@+id/img1"></TextView>
 
    <androidx.viewpager2.widget.ViewPager2
+       android:paddingLeft="10dp"
        android:paddingRight="10dp"
-       android:layout_marginLeft="20dp"
+
        android:id="@+id/viewPager"
-       android:layout_width="350dp"
+       android:layout_width="match_parent"
        android:layout_height="200dp"
        android:layout_below="@+id/img1"
        android:layout_marginTop="-180dp" />
@@ -218,7 +219,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fake Call"
+                android:text="Hotspots"
                 android:layout_marginLeft="10dp"
                 android:textSize="20dp"
                 android:textColor="@color/black"></TextView>
