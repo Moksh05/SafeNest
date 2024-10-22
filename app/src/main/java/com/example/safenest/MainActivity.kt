@@ -16,19 +16,24 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, HomeFragment()) // Load HomeFragment initially
+                .commit()
+        }
         binding.bottomNavigation.setOnNavigationItemSelectedListener { item ->
-            var selectedFragment: Fragment? = null
+            var selectedFragment: Fragment? = HomeFragment()
             when (item.itemId) {
                 R.id.nav_home -> selectedFragment = HomeFragment()
                 R.id.nav_education -> selectedFragment = HomeFragment()
-                R.id.nav_sos -> selectedFragment = HomeFragment()
+                R.id.nav_sos -> selectedFragment = Add_Contact()
                 R.id.nav_helpline -> selectedFragment = HomeFragment()
                 R.id.nav_location -> selectedFragment = HomeFragment()
             }
             if (selectedFragment != null) {
                 supportFragmentManager.beginTransaction().replace(R.id.fragment_container, selectedFragment).commit()
             }
+
             true
         }
     }

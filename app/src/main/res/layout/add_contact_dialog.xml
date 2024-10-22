@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:padding="10dp"
+    android:layout_height="match_parent">
+
+    <View
+        android:layout_width="200dp"
+        android:layout_height="2dp"
+        android:background="@color/black"
+        android:layout_gravity="center"></View>
+
+
+    <EditText
+        android:id="@+id/input_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Name"/>
+
+    <EditText
+        android:layout_marginBottom="5dp"
+        android:id="@+id/input_phone_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Phone Number"
+        android:inputType="phone"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_import_contact"
+        android:layout_width="match_parent"
+        android:layout_margin="5dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/white_button"
+        android:text="Import from Contacts"/>
+
+    <Button
+        android:id="@+id/btn_save"
+        android:backgroundTint="@color/primary_purple"
+        android:layout_width="match_parent"
+        android:layout_margin="5dp"
+        android:padding="12dp"
+        android:layout_height="55dp"
+        android:text="SAVE"/>
+
+</LinearLayout>

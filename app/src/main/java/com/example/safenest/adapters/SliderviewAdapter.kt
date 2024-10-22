@@ -1,5 +1,8 @@
 package com.example.safenest.adapters
 
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import com.example.safenest.R
 
 
@@ -14,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 class SliderviewAdapter(private val cardList: List<Card>) : RecyclerView.Adapter<SliderviewAdapter.CardViewHolder>() {
 
     class CardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        //val cardImage: ImageView = view.findViewById(R.id.card_image)
+        val cardImage: ImageView = view.findViewById(R.id.card_img)
         val cardTitle: TextView = view.findViewById(R.id.cardtittle)
         val cardDescription: TextView = view.findViewById(R.id.description)
     }
@@ -26,9 +29,18 @@ class SliderviewAdapter(private val cardList: List<Card>) : RecyclerView.Adapter
 
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
         val card = cardList[position]
-        //holder.cardImage.setImageResource(card.imageResId)
+        holder.cardImage.setImageResource(card.imageResId)
         holder.cardTitle.text = card.title
         holder.cardDescription.text = card.description
+
+        holder.itemView.setOnClickListener {
+            val formattedNumber = card.description.replace("-", "")
+            Log.d("line37","$formattedNumber")
+            val intent = Intent(Intent.ACTION_DIAL).apply {
+                data = Uri.parse("tel:$formattedNumber")
+            }
+            holder.itemView.context.startActivity(intent)
+        }
     }
 
     override fun getItemCount(): Int = cardList.size
