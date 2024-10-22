@@ -101,6 +101,7 @@ class HomeFragment : Fragment() {
             startActivity(geofencingintent)
         }
 
+        getallcontacts()
 //        handler = Handler(Looper.getMainLooper())
 //
 //        // Initialize the Runnable to launch the FakeCallActivity
@@ -181,7 +182,10 @@ class HomeFragment : Fragment() {
                         val message =
                             "SOS! I need help. My current location is: https://maps.google.com/?q=$latitude,$longitude"
 
-                        sendSMS("+919821063740", message)
+                        for (contact in phoneNumberList) {
+                            val phoneNumber = contact.second // Get the phone number from the pair
+                            sendSMS(phoneNumber, message)
+                        }
                     }
                 }
         } else {

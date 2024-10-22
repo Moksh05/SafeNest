@@ -10,6 +10,9 @@ import android.util.Log
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -30,6 +33,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class Add_Contact : Fragment() {
     private val REQUEST_CONTACTS_PERMISSION = 1
+    private lateinit var adapter2 : contactlistAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var fabAddNumber: FloatingActionButton
     private val phoneNumberList = mutableListOf<Pair<String, String>>()
@@ -51,7 +55,48 @@ class Add_Contact : Fragment() {
         fabAddNumber = view.findViewById(R.id.add_contact)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.adapter = contactlistAdapter(phoneNumberList)
+        adapter2 = contactlistAdapter(phoneNumberList)
+        recyclerView.adapter = adapter2
+
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                // Get the position of the item that was swiped
+                val position = viewHolder.adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    // Remove the contact from the list
+                    val contact = phoneNumberList[position]
+                    phoneNumberList.removeAt(position)
+                    adapter2.notifyItemRemoved(position)
+                    // Optionally, show a Toast or Snackbar to confirm deletion
+                    Toast.makeText(requireContext(), "Deleted: ${contact.first}", Toast.LENGTH_SHORT).show()
+
+                    // Remove from SharedPreferences if needed
+                    val sharedPreferences = requireContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+                    val editor = sharedPreferences.edit()
+                    editor.remove("saved_phone_number_${contact.first}")
+                    editor.apply()
+                }
+            }
+
+            // Optional: Add swipe background color
+            override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    val itemView = viewHolder.itemView
+                    val background = ColorDrawable(Color.RED)
+                    background.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
+                    background.draw(c)
+                    super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                }
+            }
+        })
+
+        // Attach the ItemTouchHelper to the RecyclerView
+        itemTouchHelper.attachToRecyclerView(recyclerView)
+
 
         fabAddNumber.setOnClickListener { showbottomdialog() }
         super.onViewCreated(view, savedInstanceState)
@@ -81,7 +126,7 @@ class Add_Contact : Fragment() {
 
         saveButton.setOnClickListener {
             val name = nameInput?.text.toString()
-            val number = numberInput?.text.toString()
+            val number = "+91" + numberInput?.text.toString()
 
             if (name.isNotEmpty() && number.isNotEmpty()) {
                 savePhoneNumber(name, number)
@@ -101,7 +146,7 @@ class Add_Contact : Fragment() {
         // Save to SharedPreferences if needed
         val sharedPreferences = requireContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
-        editor.putString("saved_phone_number_$name", number)
+        editor.putString("saved_phone_number_$name", "+91$number")
         editor.apply()
     }
 

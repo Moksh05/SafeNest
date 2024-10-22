@@ -56,20 +56,20 @@ class GeofencingService : Service() {
     private fun handleGeofenceAction(geofence: Geofence, transitionType: Int) {
         when (transitionType) {
             Geofence.GEOFENCE_TRANSITION_ENTER -> {
-                notificationHelper.sendHighPriorityNotification("Geofence Transition Enter","",MainActivity::class.java)
+                notificationHelper.sendHighPriorityNotification("Geofence Transition Enter","You have entered a hotspot area please be on gaurd",MainActivity::class.java)
                 // Code to execute when entering the geofence
                 Log.d(TAG, "Entered geofence: ${geofence.requestId}")
                 // You can trigger notifications or update your UI here
             }
             Geofence.GEOFENCE_TRANSITION_EXIT -> {
-                notificationHelper.sendHighPriorityNotification("Geofence Transition Enter","",MainActivity::class.java)
+                notificationHelper.sendHighPriorityNotification("Geofence Transition Enter","You have exited the hotspot area, can calm yourself down",MainActivity::class.java)
 
                 // Code to execute when exiting the geofence
                 Log.d(TAG, "Exited geofence: ${geofence.requestId}")
                 // Handle the exit action
             }
             Geofence.GEOFENCE_TRANSITION_DWELL -> {
-                notificationHelper.sendHighPriorityNotification("Geofence Transition Enter","",MainActivity::class.java)
+                notificationHelper.sendHighPriorityNotification("Geofence Transition Enter","You are currently moving inside a hotspot area , pLease keep the app open in background and be aware",MainActivity::class.java)
 
                 // Code to execute when exiting the geofence
                 Log.d(TAG, "Exited geofence: ${geofence.requestId}")

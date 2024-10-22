@@ -52,6 +52,8 @@ class NotificationHelper(base: Context?) : ContextWrapper(base) {
             NotificationCompat.Builder(this, CHANNEL_ID) //                .setContentTitle(title)
                 //                .setContentText(body)
                 .setSmallIcon(R.drawable.baseline_notifications_24)
+                .setContentTitle(title)
+                .setContentText(body)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setStyle(
                     NotificationCompat.BigTextStyle().setSummaryText("summary")
