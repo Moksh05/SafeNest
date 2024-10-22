@@ -17,6 +17,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.registerReceiver
 import androidx.viewpager2.widget.ViewPager2
@@ -40,6 +41,7 @@ class HomeFragment : Fragment() {
     private lateinit var powerButtonReceiver: PowerButtonReceiver
 
     private lateinit var fakecall : CardView
+    private lateinit var geofencing : CardView
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -57,7 +59,8 @@ class HomeFragment : Fragment() {
         Log.d("line44","crashing here")
         viewPager = view.findViewById(R.id.viewPager)
         sosbutton = view.findViewById(R.id.sos_button)
-        fakecall = view.findViewById((R.id.fakecall_button))
+        geofencing = view.findViewById(R.id.geofencing)
+        fakecall = view.findViewById(R.id.fakecall_button)
         // Create the card list
         val cardList = listOf(
             Card(R.drawable.login_img, "Police", "1-0-0"),
@@ -81,10 +84,17 @@ class HomeFragment : Fragment() {
 
         }
 
+
         fakecall.setOnClickListener {
             val fakeCallIntent = Intent(requireContext(), callscreenActivity::class.java)
            startActivity(fakeCallIntent)
         }
+
+        geofencing.setOnClickListener {
+            val geofencingintent = Intent(requireContext(),GeofencingActivity::class.java)
+            startActivity(geofencingintent)
+        }
+
 //        handler = Handler(Looper.getMainLooper())
 //
 //        // Initialize the Runnable to launch the FakeCallActivity
@@ -144,7 +154,6 @@ class HomeFragment : Fragment() {
 
 
     private fun sendSos() {
-        if (checkPermissions()) {
             if (ActivityCompat.checkSelfPermission(
                     requireContext(),
                     Manifest.permission.ACCESS_FINE_LOCATION
@@ -168,10 +177,8 @@ class HomeFragment : Fragment() {
                         sendSMS("+919821063740", message)
                     }
                 }
-        } else {
-            requestPermissions()
         }
-    }
+
     fun sendSMS(phoneNumber: String, message: String) {
         try {
             val smsManager: SmsManager = SmsManager.getDefault()
@@ -203,26 +210,7 @@ class HomeFragment : Fragment() {
         //handler.removeCallbacks(fakeCallRunnable) // Remove any pending fake call if the fragment view is destroyed
     }
 
-    override fun onResume() {
-        super.onResume()
 
-        // Initialize the powerButtonReceiver
-        powerButtonReceiver = PowerButtonReceiver()
-
-        // Create the IntentFilter for screen off/on actions
-        val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
-        filter.addAction(Intent.ACTION_SCREEN_ON)
-
-        // Register the receiver
-        requireContext().registerReceiver(powerButtonReceiver, filter)
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        // Unregister the receiver
-        requireContext().unregisterReceiver(powerButtonReceiver)
-    }
 
 }
 
