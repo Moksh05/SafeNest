@@ -65,7 +65,6 @@ class MainActivity : AppCompatActivity() {
         geofencingHelper = GeofencingHelper(this)
         //createGeofencePendingIntent()
         getcurrentlocation()
-        setupGeofence(LatLng(latitude, longitude),1000f)
 
         if (Build.VERSION.SDK_INT >= 29) {
             // We need background permission
