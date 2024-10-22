@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
-    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
+
 }
 
 android {
@@ -65,7 +65,7 @@ dependencies {
     implementation (libs.okhttp)
 
     //Glide
-    implementation (libs.glide)
+    implementation(libs.glide)
 
 
 
