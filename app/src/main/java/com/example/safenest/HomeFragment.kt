@@ -26,8 +26,6 @@ import com.example.safenest.adapters.SliderviewAdapter
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
-
-
 class HomeFragment : Fragment() {
     private val PERMISSION_REQUEST_CODE = 100
     lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -38,6 +36,7 @@ class HomeFragment : Fragment() {
     //private lateinit var handler: Handler
     //private lateinit var fakeCallRunnable: Runnable
     private lateinit var powerButtonReceiver: PowerButtonReceiver
+    private lateinit var safePlacesButton: CardView
 
     private lateinit var fakecall : CardView
     override fun onCreateView(
@@ -58,6 +57,7 @@ class HomeFragment : Fragment() {
         viewPager = view.findViewById(R.id.viewPager)
         sosbutton = view.findViewById(R.id.sos_button)
         fakecall = view.findViewById((R.id.fakecall_button))
+        safePlacesButton = view.findViewById(R.id.safeplaces_button)
         // Create the card list
         val cardList = listOf(
             Card(R.drawable.login_img, "Police", "1-0-0"),
@@ -84,6 +84,11 @@ class HomeFragment : Fragment() {
         fakecall.setOnClickListener {
             val fakeCallIntent = Intent(requireContext(), callscreenActivity::class.java)
            startActivity(fakeCallIntent)
+        }
+
+
+        safePlacesButton.setOnClickListener {
+            startActivity(Intent(requireContext(), SafePlacesActivity::class.java))
         }
 //        handler = Handler(Looper.getMainLooper())
 //
@@ -157,6 +162,7 @@ class HomeFragment : Fragment() {
                 requestPermissions()
                 return
             }
+
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location ->
                     if (location != null) {
@@ -172,6 +178,8 @@ class HomeFragment : Fragment() {
             requestPermissions()
         }
     }
+
+
     fun sendSMS(phoneNumber: String, message: String) {
         try {
             val smsManager: SmsManager = SmsManager.getDefault()
