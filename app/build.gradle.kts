@@ -61,5 +61,9 @@ dependencies {
     //OkHTTP
     implementation (libs.okhttp)
 
+    //Glide
+    implementation (libs.glide)
+
+
 
 }
