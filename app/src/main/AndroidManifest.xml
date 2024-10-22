@@ -30,6 +30,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SafeNest"
         tools:targetApi="31">
+        <activity
+            android:name=".SafePlacesActivity"
+            android:exported="false" />
 
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
@@ -66,9 +69,10 @@
                 <action android:name="android.intent.action.SCREEN_ON" />
                 <action android:name="android.intent.action.SCREEN_OFF" />
             </intent-filter>
-        </receiver> <!-- Register the SirenService to play the siren sound -->
-        <service
-            android:name=".Service.SirenService"
+        </receiver>
+
+        <!-- Register the SirenService to play the siren sound -->
+        <service android:name=".Service.SirenService"
             android:enabled="true"
             android:exported="false" />
         <service
@@ -90,7 +94,7 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:exported="true" />
+            android:exported="true"></activity>
     </application>
 
 </manifest>
