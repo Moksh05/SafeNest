@@ -30,8 +30,8 @@ import com.example.safenest.adapters.contactlistAdapter
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-
 class Add_Contact : Fragment() {
+
     private val REQUEST_CONTACTS_PERMISSION = 1
     private lateinit var adapter2 : contactlistAdapter
     private lateinit var recyclerView: RecyclerView
@@ -41,6 +41,7 @@ class Add_Contact : Fragment() {
     private var nameInput: EditText? = null
     private var numberInput: EditText? = null
     val CONTACT_PICKER_REQUEST = 1
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -50,7 +51,7 @@ class Add_Contact : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        getallcontacts()
+        getAllContacts()
         recyclerView = view.findViewById(R.id.contact_list)
         fabAddNumber = view.findViewById(R.id.add_contact)
 
@@ -64,17 +65,16 @@ class Add_Contact : Fragment() {
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                // Get the position of the item that was swiped
                 val position = viewHolder.adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    // Remove the contact from the list
                     val contact = phoneNumberList[position]
                     phoneNumberList.removeAt(position)
                     adapter2.notifyItemRemoved(position)
-                    // Optionally, show a Toast or Snackbar to confirm deletion
+
+                    // Optionally, show a Toast to confirm deletion
                     Toast.makeText(requireContext(), "Deleted: ${contact.first}", Toast.LENGTH_SHORT).show()
 
-                    // Remove from SharedPreferences if needed
+                    // Remove from SharedPreferences
                     val sharedPreferences = requireContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
                     val editor = sharedPreferences.edit()
                     editor.remove("saved_phone_number_${contact.first}")
@@ -82,7 +82,6 @@ class Add_Contact : Fragment() {
                 }
             }
 
-            // Optional: Add swipe background color
             override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
                 if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
                     val itemView = viewHolder.itemView
@@ -94,11 +93,9 @@ class Add_Contact : Fragment() {
             }
         })
 
-        // Attach the ItemTouchHelper to the RecyclerView
         itemTouchHelper.attachToRecyclerView(recyclerView)
 
-
-        fabAddNumber.setOnClickListener { showbottomdialog() }
+        fabAddNumber.setOnClickListener { showBottomDialog() }
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -110,13 +107,13 @@ class Add_Contact : Fragment() {
         }
     }
 
-    private fun showbottomdialog(){
+    private fun showBottomDialog() {
         bottomSheetDialog = BottomSheetDialog(requireContext())
-        val dialog = layoutInflater.inflate(R.layout.add_contact_dialog,null)
+        val dialog = layoutInflater.inflate(R.layout.add_contact_dialog, null)
         bottomSheetDialog!!.setContentView(dialog)
 
-        nameInput = dialog.findViewById<EditText>(R.id.input_name)
-        numberInput = dialog.findViewById<EditText>(R.id.input_phone_number)
+        nameInput = dialog.findViewById(R.id.input_name)
+        numberInput = dialog.findViewById(R.id.input_phone_number)
         val importContactButton = dialog.findViewById<Button>(R.id.btn_import_contact)
         val saveButton = dialog.findViewById<Button>(R.id.btn_save)
 
@@ -139,23 +136,22 @@ class Add_Contact : Fragment() {
         bottomSheetDialog!!.show()
     }
 
-    private fun savePhoneNumber(name : String , number : String){
+    private fun savePhoneNumber(name: String, number: String) {
         phoneNumberList.add(Pair(name, number))
         recyclerView.adapter?.notifyDataSetChanged()
 
-        // Save to SharedPreferences if needed
         val sharedPreferences = requireContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
-        editor.putString("saved_phone_number_$name", "+91$number")
+        editor.putString("saved_phone_number_$name", number)
         editor.apply()
     }
 
-
     private fun pickContact() {
-        val intent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
+        val intent = Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
         startActivityForResult(intent, CONTACT_PICKER_REQUEST)
     }
 
+    @Deprecated("Deprecated in Java")
     @SuppressLint("Range")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -163,55 +159,44 @@ class Add_Contact : Fragment() {
         if (requestCode == CONTACT_PICKER_REQUEST && resultCode == Activity.RESULT_OK) {
             val contactUri: Uri? = data?.data
             contactUri?.let { uri ->
-                // Query the contact ID and details
-                val cursor = requireContext().contentResolver.query(uri, null, null, null, null)
+                val cursor = requireContext().contentResolver.query(
+                    uri,
+                    arrayOf(
+                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                        ContactsContract.CommonDataKinds.Phone.NUMBER
+                    ),
+                    null,
+                    null,
+                    null
+                )
+
                 cursor?.use {
                     if (it.moveToFirst()) {
-                        val id = it.getString(it.getColumnIndex(ContactsContract.Contacts._ID))
-                        val hasPhoneNumber = it.getInt(it.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))
+                        val name = it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
+                        val phoneNumber = it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
 
-                        if (hasPhoneNumber > 0) {
-                            val phoneCursor = requireContext().contentResolver.query(
-                                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                                null,
-                                "${ContactsContract.CommonDataKinds.Phone.CONTACT_ID} = ?",
-                                arrayOf(id),
-                                null
-                            )
-                            phoneCursor?.use { pc ->
-                                if (pc.moveToFirst()) {
-                                    val phoneNumber = pc.getString(pc.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                                    // Do something with the phone number (e.g., display or store it)
-                                    Log.d("PhoneNumber", "Selected phone number: $phoneNumber")
-                                }
-                            }
-                        }
+                        // Log and save contact info
+                        Log.d("PhoneNumber", "Selected contact: $name, $phoneNumber")
+
+                        savePhoneNumber(name, phoneNumber)
+                        bottomSheetDialog!!.dismiss()
                     }
                 }
             }
         }
     }
 
-
-
-    fun getallcontacts(){
+    fun getAllContacts() {
         val sharedPreferences = requireContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
         val allEntries: Map<String, *> = sharedPreferences.all
 
-        // Iterate through all entries in SharedPreferences
         for ((key, value) in allEntries) {
             if (key.startsWith("saved_phone_number_")) {
                 val contactName = key.removePrefix("saved_phone_number_")
                 val contactNumber = value.toString()
-                // Log the contact name and number
-                phoneNumberList.add(Pair(contactName,contactNumber))
+                phoneNumberList.add(Pair(contactName, contactNumber))
                 Log.d("StoredContact", "Name: $contactName, Number: $contactNumber")
             }
         }
     }
-
-
-
-
-
 }
