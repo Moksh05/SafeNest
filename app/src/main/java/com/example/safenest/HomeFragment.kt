@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
@@ -24,23 +25,34 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.safenest.Receiver.PowerButtonReceiver
 import com.example.safenest.adapters.Card
 import com.example.safenest.adapters.SliderviewAdapter
+import com.example.safenest.models.SosModel
+import com.example.safenest.models.UserModel
+import com.example.safenest.models.stringModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 class HomeFragment : Fragment() {
     private val PERMISSION_REQUEST_CODE = 100
     lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var viewPager: ViewPager2
+    private var firebaseAuth =  FirebaseAuth.getInstance()
     private lateinit var sosbutton: CardView
+    private  var firestore  = FirebaseFirestore.getInstance()
     private lateinit var cardAdapter: SliderviewAdapter
     private val phoneNumberList = mutableListOf<Pair<String, String>>()
-    //private lateinit var handler: Handler
-    //private lateinit var fakeCallRunnable: Runnable
     private lateinit var powerButtonReceiver: PowerButtonReceiver
     private lateinit var safePlacesButton: CardView
-
+    private lateinit var logout:Button
+    private  var phone : String = ""
     private lateinit var fakecall : CardView
     private lateinit var geofencing : CardView
     override fun onCreateView(
@@ -57,8 +69,10 @@ class HomeFragment : Fragment() {
 
 
         // Find the ViewPager2
+        FirebaseApp.initializeApp(requireContext())
         Log.d("line44","crashing here")
         viewPager = view.findViewById(R.id.viewPager)
+        logout = view.findViewById<Button>(R.id.logout_button)
         sosbutton = view.findViewById(R.id.sos_button)
         safePlacesButton = view.findViewById(R.id.safeplaces_button)
         geofencing = view.findViewById(R.id.geofencing)
@@ -70,11 +84,18 @@ class HomeFragment : Fragment() {
             Card(R.drawable.login_img, "Police", "1-0-0"),
             Card(R.drawable.login_img, "Hospital", "1-0-1")
         )
+        getuserdata()
 
         // Set up the adapter
         cardAdapter = SliderviewAdapter(cardList)
         viewPager.adapter = cardAdapter
 
+
+        logout.setOnClickListener {
+            firebaseAuth.signOut()
+            val intent = Intent(requireContext(),LoginSignup::class.java)
+            startActivity(intent)
+        }
         Log.d("line60","crashing here")
         sosbutton.setOnClickListener {
 
@@ -102,18 +123,9 @@ class HomeFragment : Fragment() {
         }
 
         getallcontacts()
-//        handler = Handler(Looper.getMainLooper())
-//
-//        // Initialize the Runnable to launch the FakeCallActivity
-//        fakeCallRunnable = Runnable {
-//            val fakeCallIntent = Intent(requireContext(), fakecall::class.java)
-//            startActivity(fakeCallIntent)
-//        }
-//
-//        fakecall.setOnClickListener {
-//            handler.postDelayed(fakeCallRunnable, 10000)
-//
-//        }
+        Log.d("mystring", "line129")
+
+
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -186,6 +198,10 @@ class HomeFragment : Fragment() {
                             val phoneNumber = contact.second // Get the phone number from the pair
                             sendSMS(phoneNumber, message)
                         }
+
+
+                       postMessagefirestore(latitude,longitude)
+
                     }
                 }
         } else {
@@ -207,20 +223,22 @@ class HomeFragment : Fragment() {
         val allEntries: Map<String, *> = sharedPreferences.all
 
         // Iterate through all entries in SharedPreferences
-        for ((key, value) in allEntries) {
-            if (key.startsWith("saved_phone_number_")) {
-                val contactName = key.removePrefix("saved_phone_number_")
-                val contactNumber = value.toString()
-                // Log the contact name and number
-                phoneNumberList.add(Pair(contactName,contactNumber))
-                Log.d("StoredContact", "Name: $contactName, Number: $contactNumber")
+        if(allEntries.isNotEmpty()){
+            for ((key, value) in allEntries) {
+                if (key.startsWith("saved_phone_number_")) {
+                    val contactName = key.removePrefix("saved_phone_number_")
+                    val contactNumber = value.toString()
+                    // Log the contact name and number
+                    phoneNumberList.add(Pair(contactName,contactNumber))
+                    Log.d("StoredContact", "Name: $contactName, Number: $contactNumber")
+                }
             }
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        //handler.removeCallbacks(fakeCallRunnable) // Remove any pending fake call if the fragment view is destroyed
+        requireContext().unregisterReceiver(powerButtonReceiver)
     }
 
     override fun onResume() {
@@ -243,6 +261,59 @@ class HomeFragment : Fragment() {
         // Unregister the receiver
         requireContext().unregisterReceiver(powerButtonReceiver)
     }
+
+
+
+    fun postMessagefirestore(latitude : Double,longitude:Double) {
+        // Get a reference to Firestor
+        // Generate a unique document ID (Firestore uses document IDs)
+        val messageId = firestore.collection("messages").document().id
+        Log.d("mystring2", messageId)
+        val locationlink = "https://maps.google.com/?q=$latitude,$longitude"
+        // Create a message model
+        val messageData = SosModel(
+            locationlink = locationlink,
+            useremail = firebaseAuth.currentUser!!.email.toString(),
+            phonenumber = "+91"+phone
+        )
+        // Store the message in Firestore
+        firestore.collection("messages").document(messageId)
+            .set(messageData)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("mystring2", "Message posted")
+                } else {
+                    Log.e("mystring2", "Error posting message")
+                }
+            }
+            .addOnFailureListener { error ->
+                Log.e("mystring2", "Error posting message: ${error.message}")
+            }
+    }
+
+    private fun getuserdata(){
+        val userDocumentRef = firestore.collection("users").document(firebaseAuth.currentUser!!.email!!)
+        Log.d("mystring3", "line 300")
+        // Get the document from Firestore
+        userDocumentRef.get()
+            .addOnSuccessListener { document ->
+
+                if (document.exists()) {
+
+                    // Convert the document to UserModel and store it in the variable "user"
+                    Log.d("mystring3", "User data retrieved: ${document.data}")
+                    phone = document.getString("phonenumber").toString()
+
+                    // Use the user data (e.g., display it or pass it to another function)
+                } else {
+                    Log.e("mystring3", "User document does not exist")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("mystring", "Error retrieving user data: ${exception.message}")
+            }
+    }
+
 
 }
 

@@ -20,12 +20,12 @@ class GeofencingReceiver : BroadcastReceiver() {
         // This method is called when the BroadcastReceiver is receiving an Intent broadcast.
 
         Toast.makeText(context, "Geofence Triggered", Toast.LENGTH_SHORT).show()
-        Log.d("mystringcheck", "Geofence Triggered - Toast shown inside receiver")
+        Log.d("mystringcheck2", "Geofence Triggered - Toast shown inside receiver")
 
         notificationHelper = NotificationHelper(context)
         val geofencingEvent = fromIntent(intent ?: return)
         if (geofencingEvent!!.hasError()) {
-            Log.e("mystringcheck", "Error code: ${geofencingEvent.errorCode} inside receiver")
+            Log.e("mystringcheck2", "Error code: ${geofencingEvent.errorCode} inside receiver")
             return
         }
 
@@ -40,13 +40,13 @@ class GeofencingReceiver : BroadcastReceiver() {
             val triggeringGeofences = geofencingEvent.triggeringGeofences
             if (triggeringGeofences != null) {
                 for (geofence in triggeringGeofences) {
-                    Log.d("mystringcheck", "Geofence triggered: ${geofence.requestId} inside receiver")
+                    Log.d("mystringcheck2", "Geofence triggered: ${geofence.requestId} inside receiver")
                     // Handle the geofence transition here (e.g., notify the user, start an action, etc.)
                     handleGeofenceAction(geofence, geofenceTransition)
                 }
             }
         } else {
-            Log.e("mystringcheck", "Geofence transition type not recognized: $geofenceTransition inside receiver")
+            Log.e("mystringcheck2", "Geofence transition type not recognized: $geofenceTransition inside receiver")
         }
 
         val serviceIntent = Intent(context, GeofencingService::class.java)
@@ -60,11 +60,11 @@ class GeofencingReceiver : BroadcastReceiver() {
             Geofence.GEOFENCE_TRANSITION_ENTER -> {
                 notificationHelper.sendHighPriorityNotification(
                     "Geofence Transition Enter",
-                    "You have entered a hotspot area, please be on guard",
+                    "You have entered a hot spot area, please be on guard",
                     MainActivity::class.java
                 )
                 // Code to execute when entering the geofence
-                Log.d("mystringcheck", "Entered geofence: ${geofence.requestId} - Notification sent for entering inside receiver")
+                Log.d("mystringcheck2", "Entered geofence: ${geofence.requestId} - Notification sent for entering inside receiver")
             }
             Geofence.GEOFENCE_TRANSITION_EXIT -> {
                 notificationHelper.sendHighPriorityNotification(
@@ -73,7 +73,7 @@ class GeofencingReceiver : BroadcastReceiver() {
                     MainActivity::class.java
                 )
                 // Code to execute when exiting the geofence
-                Log.d("mystringcheck", "Exited geofence: ${geofence.requestId} - Notification sent for exiting inside receiver")
+                Log.d("mystringcheck2", "Exited geofence: ${geofence.requestId} - Notification sent for exiting inside receiver")
             }
             Geofence.GEOFENCE_TRANSITION_DWELL -> {
                 notificationHelper.sendHighPriorityNotification(
@@ -82,7 +82,7 @@ class GeofencingReceiver : BroadcastReceiver() {
                     MainActivity::class.java
                 )
                 // Code to execute when dwelling inside the geofence
-                Log.d("mystringcheck", "Dwelling in geofence: ${geofence.requestId} - Notification sent for dwelling inside receiver")
+                Log.d("mystringcheck2", "Dwelling in geofence: ${geofence.requestId} - Notification sent for dwelling inside receiver")
             }
             else -> {
                 Log.e("mystringcheck", "Unknown geofence transition type: $transitionType inside receiver")

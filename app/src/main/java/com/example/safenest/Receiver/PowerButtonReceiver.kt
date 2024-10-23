@@ -35,7 +35,7 @@ class PowerButtonReceiver : BroadcastReceiver() {
         }
 
         // Start playing loud siren when power button is tapped 6 times
-        if (powerBtnTapCount == 2) {
+        if (powerBtnTapCount == 4) {
             mediaPlayer?.start()
             mediaPlayer?.isLooping = true
             powerBtnTapCount = 0 // Reset the tap count

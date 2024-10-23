@@ -35,10 +35,10 @@ class GeofencingHelper(base: Context) : ContextWrapper(base){
 
     fun getPendingIntent(): PendingIntent? {
         if (pendingIntent != null) {
-            Log.d("mystringcheck","inside if of pending intent wront thing")
+            Log.d("mystringcheck2","same pending intent as prev")
             return pendingIntent
         }
-        Log.d("mystringcheck","good thung")
+        Log.d("mystringcheck2","new pending intent created")
         val intent = Intent(this, GeofencingReceiver::class.java)
         pendingIntent = PendingIntent.getBroadcast(this, 2607, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         return pendingIntent

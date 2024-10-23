@@ -17,10 +17,13 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="70dp"
         android:layout_alignParentBottom="true"
         app:menu="@menu/bottom_navbar_menu"
-        app:itemIconTint="@color/primary_purple"
-        app:itemTextColor="@color/primary_purple" />
+        android:background="@color/primary_purple"
+        app:itemActiveIndicatorStyle="@drawable/linear_white_transparent_background"
+        app:itemIconTint="@color/white"
+        app:labelVisibilityMode="selected"
+        app:itemTextColor="@color/white" />
 
 </RelativeLayout>

@@ -11,8 +11,10 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.example.safenest.databinding.ActivityLoginSignupBinding
+import com.example.safenest.models.UserModel
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class LoginSignup : AppCompatActivity() {
 
@@ -48,12 +50,13 @@ class LoginSignup : AppCompatActivity() {
             Toast.makeText(this,"Failed to Login , Try Again",Toast.LENGTH_SHORT).show()
         }
     }
-
-    private fun SignUp(){
-        val username = binding.signupusername.text.toString().trim()
-        val Email = binding.signupemail.text.toString().trim()
+    private fun SignUp() {
+        val phonenumber = binding.signupphonenumber.text.toString().trim()
+        val email = binding.signupemail.text.toString().trim()
         val password = binding.signuppass.text.toString().trim()
-        if (!Email.contains("@gmail.com")) {
+        //val phoneNumber = binding.signupphone.text.toString().trim()
+
+        if (!email.contains("@gmail.com")) {
             Toast.makeText(
                 this,
                 "Please use a valid email, provided by gmail.com",
@@ -63,39 +66,60 @@ class LoginSignup : AppCompatActivity() {
             return
         }
 
-
-
         if (password.length < 6) {
             Toast.makeText(
                 this,
-                "Enter a valid password , having atleast 6 characters",
+                "Enter a valid password, having at least 6 characters",
                 Toast.LENGTH_SHORT
             ).show()
             binding.signuppass.text = null
             return
         }
 
-
-
-        firebaseAuth.createUserWithEmailAndPassword(Email, password).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                if (task.isSuccessful) {
-                    Toast.makeText(
-                        this,
-                        "Account Created, Please login",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    binding.flipper.displayedChild = 1
-                }
-
-
-            }
-
-
-        }.addOnFailureListener { e->
+        if (phonenumber.isEmpty() || phonenumber.length <10) {
             Toast.makeText(
                 this,
-                "Signing Up failed please try again later \n ${e.toString()}",
+                "Please enter a valid phone number",
+                Toast.LENGTH_SHORT
+            ).show()
+            //binding.signupphone.text = null
+            return
+        }
+
+        firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val userId = firebaseAuth.currentUser?.email
+                if (userId != null) {
+                    // Create a user model with the entered details
+                    val userModel = UserModel(
+                        phonenumber = phonenumber,
+                        email = email
+                    )
+
+                    // Save the user information in Firestore
+                    val db = FirebaseFirestore.getInstance()
+                    db.collection("users").document(userId).set(userModel)
+                        .addOnSuccessListener {
+                            Toast.makeText(
+                                this,
+                                "Account Created. Please login",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            binding.flipper.displayedChild = 1
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(
+                                this,
+                                "Failed to save user data: ${e.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                }
+            }
+        }.addOnFailureListener { e ->
+            Toast.makeText(
+                this,
+                "Signing Up failed. Please try again later \n${e.toString()}",
                 Toast.LENGTH_SHORT
             ).show()
         }

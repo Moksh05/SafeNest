@@ -16,6 +16,7 @@ import com.example.safenest.Receiver.PowerButtonReceiver
 import com.example.safenest.Service.SirenService
 import com.example.safenest.databinding.ActivityGeofencingBinding
 import com.example.safenest.databinding.ActivityMainBinding
+import com.example.safenest.models.GeofenceModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
@@ -25,6 +26,10 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.firestore
 
 
 class MainActivity : AppCompatActivity() {
@@ -32,8 +37,9 @@ class MainActivity : AppCompatActivity() {
     var latitude =31.4804674
     var longitude=76.187401
     val GEOFENCE_ID = "mygeofence"
+    private var geofenceList = mutableListOf<GeofenceModel>()
     val fencelatlng = LatLng(31.3515042, 76.1479397)
-
+    private var db: FirebaseFirestore = Firebase.firestore
 
     private lateinit var geofencingClient: GeofencingClient
     private lateinit var geofencingHelper: GeofencingHelper
@@ -55,7 +61,7 @@ class MainActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, HomeFragment()) // Load HomeFragment initially
+                .replace(R.id.fragment_container, education()) // Load HomeFragment initially
                 .commit()
         }
 
@@ -69,7 +75,8 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= 29) {
             // We need background permission
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                setupGeofence(LatLng(latitude, longitude),1000f)
+                //setupGeofence(LatLng(latitude, longitude),1000f)
+                getgeofencesfromdb()
             } else {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
                     // Show a dialog and ask for permission
@@ -79,7 +86,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         } else {
-            setupGeofence(LatLng(latitude, longitude),1000f)
+            //setupGeofence(LatLng(latitude, longitude),1000f)
+            getgeofencesfromdb()
         }
 
 
@@ -93,11 +101,10 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNavigation.setOnNavigationItemSelectedListener { item ->
             var selectedFragment: Fragment? = HomeFragment()
             when (item.itemId) {
+
+                R.id.nav_education -> selectedFragment = education()
                 R.id.nav_home -> selectedFragment = HomeFragment()
-                R.id.nav_education -> selectedFragment = HomeFragment()
-                R.id.nav_sos -> selectedFragment = Add_Contact()
-                R.id.nav_helpline -> selectedFragment = HomeFragment()
-                R.id.nav_location -> selectedFragment = HomeFragment()
+                R.id.nav_contacts -> selectedFragment = Add_Contact()
             }
             if (selectedFragment != null) {
                 supportFragmentManager.beginTransaction().replace(R.id.fragment_container, selectedFragment).commit()
@@ -107,7 +114,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupGeofence(latLng: LatLng, radius: Float) {
+    private fun setupGeofence(geofenceid : String ,latLng: LatLng, radius: Float) {
         // Check for location permissions
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -125,17 +132,18 @@ class MainActivity : AppCompatActivity() {
 
         // Create the Geofence
         val geofence: Geofence = geofencingHelper.getGeofence(
-            GEOFENCE_ID,
+            geofenceid,
             latLng,
             radius,
             Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_DWELL
         )
+
         val geofencingRequest: GeofencingRequest = geofencingHelper.getGeofencingRequest(geofence)
         val pendingIntent: PendingIntent? = geofencingHelper.getPendingIntent()
-
+        Log.d("mmystringcheck2", "fence added with geoid : $geofenceid")
         // Add the Geofence
         geofencingClient.addGeofences(geofencingRequest, pendingIntent!!).addOnSuccessListener {
-            Log.d("mystringcheck", "Geofence added...")
+            Log.d("mystringcheck2", "Geofence added... $geofenceid")
         }.addOnFailureListener { e ->
             val errorMsg = geofencingHelper.getErrorString(e)
             Log.d("mystringcheck", "Geofence failed $errorMsg")
@@ -206,5 +214,32 @@ class MainActivity : AppCompatActivity() {
 
             }
 
+    }
+
+    private fun getgeofencesfromdb(){
+        db.collection("Geofences")
+            .get()
+            .addOnSuccessListener { result: QuerySnapshot ->
+                for (document in result) {
+                    val geofenceID = document.getString("geofenceid") ?: ""
+                    val latitude = document.getString("latitude") ?: "0.0"
+                    val longitude = document.getString("longitude") ?: "0.0"
+                    val radius = document.getString("radius") ?: "100f"
+                    val severity = document.getString("severity") ?: "5"
+                    val geofenceData = GeofenceModel(geofenceID, latitude.toDouble(), longitude.toDouble(),radius.toFloat(),severity.toInt())
+                    geofenceList.add(geofenceData)
+
+                }
+                Log.d("mystringcheck",geofenceList.toString())
+
+                for (fence in geofenceList){
+                    setupGeofence(fence.geofenceID,LatLng(fence.latitude,fence.longitude),fence.radius)
+                }
+
+
+            }
+            .addOnFailureListener { exception ->
+                exception.printStackTrace()
+            }
     }
 }

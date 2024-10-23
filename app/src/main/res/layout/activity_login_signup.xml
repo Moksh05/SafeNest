@@ -170,13 +170,14 @@
             android:layout_marginLeft="5dp"></TextView>
 
         <EditText
-            android:id="@+id/signupusername"
+            android:id="@+id/signupphonenumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Username"
+            android:hint="Phone Number"
             android:drawableLeft="@drawable/user"
             android:drawablePadding="5dp"
             android:padding="10dp"
+            android:inputType="phone"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginTop="20dp"
