@@ -1,6 +1,7 @@
 package com.example.safenest
 
 import android.Manifest
+import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -57,20 +58,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
 
-
-
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, education()) // Load HomeFragment initially
-                .commit()
-        }
-
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         geofencingClient = LocationServices.getGeofencingClient(this)
         geofencingHelper = GeofencingHelper(this)
         //createGeofencePendingIntent()
         getcurrentlocation()
+
+        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, HomeFragment()).commit()
+        binding.bottomNavigation.selectedItemId = R.id.nav_home
 
         if (Build.VERSION.SDK_INT >= 29) {
             // We need background permission
@@ -80,7 +75,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
                     // Show a dialog and ask for permission
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), BACKGROUND_LOCATION_ACCESS_REQUEST_CODE)
+                    showPermissionRationaleDialog()
                 } else {
                     ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), BACKGROUND_LOCATION_ACCESS_REQUEST_CODE)
                 }
@@ -98,17 +93,16 @@ class MainActivity : AppCompatActivity() {
         )
         this.startService(backgroundService)
         Log.d(PowerButtonReceiver.SCREEN_TOGGLE_TAG, "Activity onCreate")
+
         binding.bottomNavigation.setOnNavigationItemSelectedListener { item ->
-            var selectedFragment: Fragment? = HomeFragment()
+            var selectedFragment: Fragment = HomeFragment()
             when (item.itemId) {
 
                 R.id.nav_education -> selectedFragment = education()
                 R.id.nav_home -> selectedFragment = HomeFragment()
                 R.id.nav_contacts -> selectedFragment = Add_Contact()
             }
-            if (selectedFragment != null) {
-                supportFragmentManager.beginTransaction().replace(R.id.fragment_container, selectedFragment).commit()
-            }
+            supportFragmentManager.beginTransaction().replace(R.id.fragment_container, selectedFragment).commit()
 
             true
         }
@@ -242,4 +236,20 @@ class MainActivity : AppCompatActivity() {
                 exception.printStackTrace()
             }
     }
+
+    private fun showPermissionRationaleDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Background Location Permission")
+        builder.setMessage("This app requires background location access to trigger geofences even when the app is not in use.")
+        builder.setPositiveButton("OK") { _, _ ->
+            // Request the permission after showing the rationale
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), BACKGROUND_LOCATION_ACCESS_REQUEST_CODE)
+        }
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+            Toast.makeText(this, "Permission denied. Geofences won't work without background location.", Toast.LENGTH_SHORT).show()
+        }
+        builder.create().show()
+    }
+
 }

@@ -15,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
@@ -51,9 +52,10 @@ class HomeFragment : Fragment() {
     private val phoneNumberList = mutableListOf<Pair<String, String>>()
     private lateinit var powerButtonReceiver: PowerButtonReceiver
     private lateinit var safePlacesButton: CardView
-    private lateinit var logout:Button
+    private lateinit var logout:TextView
     private  var phone : String = ""
     private lateinit var fakecall : CardView
+    private lateinit var recorder : CardView
     private lateinit var geofencing : CardView
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -72,17 +74,19 @@ class HomeFragment : Fragment() {
         FirebaseApp.initializeApp(requireContext())
         Log.d("line44","crashing here")
         viewPager = view.findViewById(R.id.viewPager)
-        logout = view.findViewById<Button>(R.id.logout_button)
+        logout = view.findViewById<Button>(R.id.logout)
         sosbutton = view.findViewById(R.id.sos_button)
         safePlacesButton = view.findViewById(R.id.safeplaces_button)
         geofencing = view.findViewById(R.id.geofencing)
         fakecall = view.findViewById(R.id.fakecall_button)
+        recorder = view.findViewById(R.id.audio)
         // Create the card list
         val cardList = listOf(
-            Card(R.drawable.login_img, "Police", "1-0-0"),
-            Card(R.drawable.login_img, "Hospital", "1-0-1"),
-            Card(R.drawable.login_img, "Police", "1-0-0"),
-            Card(R.drawable.login_img, "Hospital", "1-0-1")
+            Card(R.drawable.doctor, "Hospital", "1-0-1",R.drawable.hospital),
+            Card(R.drawable.policeman, "Police", "1-0-0",R.drawable.police_back),
+
+            Card(R.drawable.protection, "Women Safety", "1-8-1",R.drawable.womensafety_back),
+            Card(R.drawable.sexual_harassment, "Women Abuse", "1-0-9-8",R.drawable.womenabuse_back)
         )
         getuserdata()
 
@@ -121,6 +125,13 @@ class HomeFragment : Fragment() {
             val geofencingintent = Intent(requireContext(),GeofencingActivity::class.java)
             startActivity(geofencingintent)
         }
+        recorder.setOnClickListener {
+            val recorderintent = Intent(requireContext(),recorderActivity::class.java)
+            startActivity(recorderintent)
+        }
+
+
+
 
         getallcontacts()
         Log.d("mystring", "line129")
@@ -163,7 +174,7 @@ class HomeFragment : Fragment() {
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 // All permissions granted, proceed with your functionality
-                Toast.makeText(requireContext(), "Permissions Granted", Toast.LENGTH_SHORT).show()
+            // oast.makeText(requireContext(), "Permissions Granted", Toast.LENGTH_SHORT).show()
             } else {
                 // Permission denied, show an appropriate message
                 Toast.makeText(requireContext(), "Permissions Denied", Toast.LENGTH_SHORT).show()
@@ -236,10 +247,10 @@ class HomeFragment : Fragment() {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        requireContext().unregisterReceiver(powerButtonReceiver)
-    }
+//    override fun onDestroyView() {
+//        super.onDestroyView()
+//        requireContext().unregisterReceiver(powerButtonReceiver)
+//    }
 
     override fun onResume() {
         super.onResume()

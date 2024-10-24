@@ -38,7 +38,7 @@ class GeofencingService : Service() {
 
         // Check if the transition is of interest (enter or exit)
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
-            geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+            geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT || geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
             // Get the triggering geofences
             val triggeringGeofences = geofencingEvent.triggeringGeofences
             if (triggeringGeofences != null) {

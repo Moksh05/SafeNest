@@ -100,6 +100,7 @@ class LoginSignup : AppCompatActivity() {
                     val db = FirebaseFirestore.getInstance()
                     db.collection("users").document(userId).set(userModel)
                         .addOnSuccessListener {
+                            binding.flipper.showPrevious()
                             Toast.makeText(
                                 this,
                                 "Account Created. Please login",

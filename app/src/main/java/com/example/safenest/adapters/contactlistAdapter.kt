@@ -28,6 +28,7 @@ class contactlistAdapter(private val phoneNumbers: MutableList<Pair<String, Stri
             data = Uri.parse("tel:$number")
         }
 
+
         holder.itemView.context.startActivity(intent)
     }
 

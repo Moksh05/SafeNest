@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
@@ -20,6 +21,7 @@ class SliderviewAdapter(private val cardList: List<Card>) : RecyclerView.Adapter
         val cardImage: ImageView = view.findViewById(R.id.card_img)
         val cardTitle: TextView = view.findViewById(R.id.cardtittle)
         val cardDescription: TextView = view.findViewById(R.id.description)
+        val back :RelativeLayout = view.findViewById(R.id.feature_card)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
@@ -32,6 +34,7 @@ class SliderviewAdapter(private val cardList: List<Card>) : RecyclerView.Adapter
         holder.cardImage.setImageResource(card.imageResId)
         holder.cardTitle.text = card.title
         holder.cardDescription.text = card.description
+        holder.back.setBackgroundResource(card.backresID)
 
         holder.itemView.setOnClickListener {
             val formattedNumber = card.description.replace("-", "")
@@ -49,5 +52,6 @@ class SliderviewAdapter(private val cardList: List<Card>) : RecyclerView.Adapter
 data class Card(
     val imageResId: Int,
     val title: String,
-    val description: String
+    val description: String,
+    val backresID : Int
 )

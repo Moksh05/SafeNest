@@ -19,6 +19,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -35,11 +36,14 @@ class Add_Contact : Fragment() {
     private val REQUEST_CONTACTS_PERMISSION = 1
     private lateinit var adapter2 : contactlistAdapter
     private lateinit var recyclerView: RecyclerView
-    private lateinit var fabAddNumber: FloatingActionButton
+    private lateinit var importcontact: Button
+    private lateinit var dialcontact: Button
+    private lateinit var savecontact: Button
+    private lateinit var backbutton : ImageView
     private val phoneNumberList = mutableListOf<Pair<String, String>>()
     private var bottomSheetDialog: BottomSheetDialog? = null
-    private var nameInput: EditText? = null
-    private var numberInput: EditText? = null
+    private lateinit var nameInput: EditText
+    private lateinit  var numberInput: EditText
     val CONTACT_PICKER_REQUEST = 1
 
     override fun onCreateView(
@@ -53,7 +57,13 @@ class Add_Contact : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         getAllContacts()
         recyclerView = view.findViewById(R.id.contact_list)
-        fabAddNumber = view.findViewById(R.id.add_contact)
+        importcontact = view.findViewById(R.id.import_contact)
+        savecontact = view.findViewById(R.id.save_contact)
+        dialcontact = view.findViewById(R.id.dial_contact)
+        backbutton = view.findViewById(R.id.back_button)
+        nameInput = view.findViewById(R.id.contactnameinput)
+        numberInput = view.findViewById(R.id.contactnumberinput)
+
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         adapter2 = contactlistAdapter(phoneNumberList)
@@ -95,7 +105,39 @@ class Add_Contact : Fragment() {
 
         itemTouchHelper.attachToRecyclerView(recyclerView)
 
-        fabAddNumber.setOnClickListener { showBottomDialog() }
+        importcontact.setOnClickListener { checkContactPermission() }
+
+        dialcontact.setOnClickListener {
+            val number = numberInput.text.toString().trim()
+            if(!number.isBlank()){
+                val intent = Intent(Intent.ACTION_DIAL).apply {
+                    data = Uri.parse("tel:$number")
+                }
+                startActivity(intent)
+            }else{
+                Toast.makeText(requireContext(),"Number is required",Toast.LENGTH_SHORT).show()
+            }
+
+        }
+
+        backbutton.setOnClickListener {
+        }
+        savecontact.setOnClickListener {
+            val name = nameInput.text.toString().trim()
+            val number = numberInput.text.toString().trim()
+
+            if (name.isBlank()) {
+                Toast.makeText(requireContext(),"Name is required",Toast.LENGTH_SHORT).show()
+            } else if (number.isBlank()) {
+                Toast.makeText(requireContext(),"Number is required",Toast.LENGTH_SHORT).show()
+            } else if (!number.matches("\\d+".toRegex()) && (number.length<10) ) {  // Check if the number contains only digits
+                Toast.makeText(requireContext(),"Enter a correct number",Toast.LENGTH_SHORT).show()
+            } else {
+                // Save the contact since both name and number are valid
+                savePhoneNumber(name, number)  // Assuming saveContact() is your method to save the contact
+            }
+        }
+
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -107,34 +149,7 @@ class Add_Contact : Fragment() {
         }
     }
 
-    private fun showBottomDialog() {
-        bottomSheetDialog = BottomSheetDialog(requireContext())
-        val dialog = layoutInflater.inflate(R.layout.add_contact_dialog, null)
-        bottomSheetDialog!!.setContentView(dialog)
 
-        nameInput = dialog.findViewById(R.id.input_name)
-        numberInput = dialog.findViewById(R.id.input_phone_number)
-        val importContactButton = dialog.findViewById<Button>(R.id.btn_import_contact)
-        val saveButton = dialog.findViewById<Button>(R.id.btn_save)
-
-        importContactButton.setOnClickListener {
-            checkContactPermission()
-        }
-
-        saveButton.setOnClickListener {
-            val name = nameInput?.text.toString()
-            val number = "+91" + numberInput?.text.toString()
-
-            if (name.isNotEmpty() && number.isNotEmpty()) {
-                savePhoneNumber(name, number)
-                bottomSheetDialog!!.dismiss()
-            } else {
-                Toast.makeText(requireContext(), "Please enter both name and number", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        bottomSheetDialog!!.show()
-    }
 
     private fun savePhoneNumber(name: String, number: String) {
         phoneNumberList.add(Pair(name, number))
@@ -178,8 +193,10 @@ class Add_Contact : Fragment() {
                         // Log and save contact info
                         Log.d("PhoneNumber", "Selected contact: $name, $phoneNumber")
 
+                        nameInput?.setText("$name")
+                        numberInput?.setText("$phoneNumber")
                         savePhoneNumber(name, phoneNumber)
-                        bottomSheetDialog!!.dismiss()
+
                     }
                 }
             }

@@ -11,11 +11,11 @@
     <item
         android:id="@+id/nav_home"
         android:icon="@drawable/home"
-        android:title="SOS" />
+        android:title="Home" />
 
     <item
         android:id="@+id/nav_contacts"
         android:icon="@drawable/helpline"
-        android:title="Helpline" />
+        android:title="Contacts" />
 
 </menu>

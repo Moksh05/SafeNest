@@ -31,9 +31,22 @@
         android:theme="@style/Theme.SafeNest"
         tools:targetApi="31">
         <activity
+            android:name=".SplashScreen"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+        <activity
+            android:name=".self_defence_Activity"
+            android:exported="false" />
+        <activity
             android:name=".SafePlacesActivity"
             android:exported="false" />
-
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
@@ -69,10 +82,9 @@
                 <action android:name="android.intent.action.SCREEN_ON" />
                 <action android:name="android.intent.action.SCREEN_OFF" />
             </intent-filter>
-        </receiver>
-
-        <!-- Register the SirenService to play the siren sound -->
-        <service android:name=".Service.SirenService"
+        </receiver> <!-- Register the SirenService to play the siren sound -->
+        <service
+            android:name=".Service.SirenService"
             android:enabled="true"
             android:exported="false" />
         <service
@@ -86,15 +98,11 @@
             android:name=".LoginSignup"
             android:exported="true"
             android:theme="@style/Theme.SafeNest">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".MainActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
     </application>
 
 </manifest>
